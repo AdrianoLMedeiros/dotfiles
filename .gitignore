@@ -1,0 +1,14 @@
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sessões de desenvolvimento (geradas pelo dev-session-manager)
+# Remova esta linha se quiser versionar os arquivos .session.md
+.session.md
