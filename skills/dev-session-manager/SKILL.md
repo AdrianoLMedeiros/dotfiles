@@ -73,13 +73,50 @@ Pergunte de forma concisa (uma única mensagem com todas as perguntas):
 ### Passo 4 — Gravar `.session.md`
 
 Use o template em `references/session-template.md`.
-Grave o arquivo na raiz do projeto detectada no Passo 1.
+
+**REGRA CRÍTICA DE GRAVAÇÃO:**
+O arquivo DEVE ser gravado na raiz do repositório Git do projeto — o mesmo
+caminho retornado por `git rev-parse --show-toplevel` no Passo 1.
+
+NUNCA use memória interna do Claude Code (`~/.claude/`, `memory/`, ou qualquer
+caminho dentro do diretório de instalação do Claude). O arquivo precisa estar
+no repositório para ser versionado e acessível em outras máquinas.
+
+Execute a gravação com o caminho absoluto:
+
+```bash
+# Windows (Git Bash / MINGW)
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
+# Exemplo de resultado esperado: /e/projetos/nexus
+
+# Gravar o arquivo
+cat > "${PROJECT_ROOT}/.session.md" << 'EOF'
+[conteúdo gerado a partir do template]
+EOF
+
+# Confirmar que foi gravado no lugar certo
+ls -la "${PROJECT_ROOT}/.session.md"
+echo "Caminho absoluto: $(realpath ${PROJECT_ROOT}/.session.md)"
+```
+
+Após gravar, execute o commit e push automático:
+
+```bash
+cd "${PROJECT_ROOT}"
+git add .session.md
+git commit -m "session: encerramento $(date '+%Y-%m-%d %H:%M')"
+git push
+```
+
+Se o push falhar (sem remote configurado, sem internet), informe o usuário
+e oriente a fazer o push manualmente antes de trocar de máquina.
 
 Após gravar, exiba um resumo compacto no chat:
 
 ```
 Sessão encerrada — [PROJETO] @ [BRANCH]
-Arquivo: [caminho]/.session.md
+Arquivo: [caminho absoluto]/.session.md
+Push: OK / PENDENTE (motivo)
 Próximo passo: [texto do próximo passo]
 Pendências registradas: [N] itens
 ```
@@ -92,15 +129,24 @@ Ao detectar o comando de retomada, execute os passos abaixo em ordem.
 
 ### Passo 1 — Localizar o arquivo de sessão
 
-```bash
-# Se o usuário informou o nome do projeto, buscar na raiz do repositório
-find ~/dev -name ".session.md" -path "*[nome-do-projeto]*" 2>/dev/null | head -5
+O arquivo `.session.md` fica na raiz do repositório Git do projeto e chega
+via `git pull` — o caminho local não importa, pois o Git sempre aponta para
+a raiz correta independente de onde o projeto está clonado na máquina.
 
-# Alternativa: detectar o projeto pelo diretório atual
-git rev-parse --show-toplevel 2>/dev/null
+```bash
+# Detectar raiz do repositório (funciona em qualquer máquina)
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+
+# Verificar se o arquivo existe
+ls "${PROJECT_ROOT}/.session.md" 2>/dev/null || echo "ARQUIVO NÃO ENCONTRADO"
 ```
 
-Se encontrar mais de um arquivo, liste as opções e pergunte qual usar.
+Se o arquivo não existir:
+1. Oriente o usuário a rodar `git pull` e tente novamente.
+2. Se ainda não existir após o pull, informe que nenhuma sessão foi registrada.
+
+Se o usuário não estiver dentro de um repositório Git, pergunte o caminho
+do projeto antes de prosseguir.
 
 ### Passo 2 — Ler e validar o arquivo
 

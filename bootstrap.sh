@@ -8,7 +8,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GITHUB_USER="AdrianoLMedeiros"
+GITHUB_USER="almedeirosm"
 REPO_NAME="dotfiles"
 REMOTE_URL="https://github.com/${GITHUB_USER}/${REPO_NAME}.git"
 
